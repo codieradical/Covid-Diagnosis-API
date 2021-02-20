@@ -44,12 +44,20 @@ def register_routes(app):
                 probabilities = np.around(model.predict([request.json["instances"]])[0], decimals=16).tolist()
                 layer = np.argmax(probabilities)
 
+        return Response(json.dumps({
+            "probabilities": probabilities,
+        }))
+
+
+    @app.route('/v1/models/covid-19-model:visualize', methods=["POST"])
+    def model_visualize():
+        print("Creating Saliency Map...")
+
         image = np.array([request.json["instances"]][0])
+        layer = request.json["label"]
 
         A = []
         b = []
-            
-        print("Creating Saliency Map...")
 
         with map_graph.as_default():
             with map_session.as_default():
@@ -83,7 +91,5 @@ def register_routes(app):
         saliency = pic_hash.decode("utf-8")
 
         return Response(json.dumps({
-            "probabilities": probabilities,
             "saliency": saliency
         }))
-
